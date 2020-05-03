@@ -1,5 +1,6 @@
 #define FREEGLUT_STATIC
 #include <GL/glut.h> // ライブラリ用ヘッダファイルの読み込み
+#include <cmath>
 
 // 表示部分をこの関数で記入
 void display(void) {
@@ -7,8 +8,8 @@ void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT);     // 画面消去
 
 	/* ここに描画に関するプログラムコードを入れる */
-	
-	glFlush(); // 画面出力
+
+  	glFlush(); // 画面出力
 }
 
 // メインプログラム
