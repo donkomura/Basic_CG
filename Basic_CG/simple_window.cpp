@@ -12,6 +12,7 @@
 // 必要な時に、その命令を呼び出す
 
 #define ID_DRAW_STAR 1 //  glNewList 関数で使用する識別ID。値は何でも構わない
+#define ID_DRAW_STAR_SMALL 2 //  glNewList 関数で使用する識別ID 黒星
 
 int rotateAngle; // 回転角度を記録しておく変数
 
@@ -29,6 +30,14 @@ void display(void) {
 	glTranslated(0.5, 0, 0);
 	glRotated(rotateAngle, 0, 0, 1);
 	glCallList(ID_DRAW_STAR);
+	glPopMatrix();
+
+    glPushMatrix();
+	glColor3d(0.0, 0.0, 0.0);
+	glTranslated(0.5, 0, 0);  // サブセットを指定位置に移動
+	glRotated(rotateAngle * 5.0, 0, 0, 1);  // 原点周りで回転（5倍）
+	glTranslated(0.45, 0, 0);  // 黒星を赤星の周りに移動
+	glCallList(ID_DRAW_STAR_SMALL);
 	glPopMatrix();
 
 	glPushMatrix();
@@ -59,7 +68,6 @@ void timer(int value) {
 // ディスプレイリストを作成する
 void buildDisplayList() {
 	glNewList(ID_DRAW_STAR,GL_COMPILE);
-
 	double r0 = 0.15; // 星の内径
 	double r1 = 0.4; // 星の外径
 	glBegin(GL_TRIANGLES);
@@ -69,8 +77,20 @@ void buildDisplayList() {
 		glVertex3d(r1 * cos( deg * M_PI / 180.0), r1 * sin( deg * M_PI / 180.0), 0);  // 外側の頂点
 		glVertex3d(r0 * cos( (deg + 36) * M_PI / 180.0), r0 * sin( (deg + 36) * M_PI / 180.0) ,0);  // 内側の頂点
 	}
-	glEnd();               
+	glEnd();
+	glEndList();
 
+	glNewList(ID_DRAW_STAR_SMALL,GL_COMPILE);
+	double r2 = 0.0375; // 星の内径   大きい星の1/4
+	double r3 = 0.1; // 星の外径
+	glBegin(GL_TRIANGLES);
+	for(int i = 0; i < 5; i++) { // 5つの三角形で星を表現する
+		int deg = i * 72;
+		glVertex3d(r2 * cos( (deg - 36) * M_PI / 180.0), r2 * sin( (deg - 36) * M_PI / 180.0), 0);  // 内側の頂点
+		glVertex3d(r3 * cos( deg * M_PI / 180.0), r3 * sin( deg * M_PI / 180.0), 0);  // 外側の頂点
+		glVertex3d(r2 * cos( (deg + 36) * M_PI / 180.0), r2 * sin( (deg + 36) * M_PI / 180.0) ,0);  // 内側の頂点
+	}
+	glEnd();
 	glEndList();
 }
 
