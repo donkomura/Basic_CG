@@ -1,5 +1,6 @@
 #define FREEGLUT_STATIC
 
+#include <random>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -67,6 +68,7 @@ Vector3d operator/( const Vector3d& v, const double& k ) { return( Vector3d( v.x
 class Sphere {
 public:
 	Vector3d position; // 中心位置
+	Vector3d vec;      // 速度
 	float color[3];    // 描画色
 
 	void setColor(float r, float g, float b) {
@@ -79,15 +81,24 @@ public:
 
 		// 座標の平行移動とスケール変換を施して球体を描画する
 		glTranslated(position.x, position.y, position.z);
-		glScaled(2, 2, 2);
+		glScaled(1, 1, 1);
 		glutSolidSphere(1.0, 32, 32);
 		
 		glPopMatrix();  // 退避していたモデル変換行列を戻す
 	}
 };
 
+// ゲームのポイント
+int g_GamePoint = 0;
+
+const int g_AnimationIntervalMsec = 600;
+
 // 3つの球体を準備しておく
-Sphere g_Sphere[3];
+#define NUM_OBJECTS 9
+Sphere g_Sphere[NUM_OBJECTS];
+
+// 視点
+double g_EyeX, g_EyeY, g_EyeZ;
 
 // 選択状態にある球体のID番号（0,1,2）を保持する。選択状態の球が無ければ-1とする。
 int g_SelectedSphereID = -1;
@@ -109,7 +120,7 @@ int pickSphere(int x, int y) {
 	glDisable(GL_LIGHTING);
 
 	// 3つの球体を描画する
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < NUM_OBJECTS; i++) {
 		// RGBのR成分に球体のIDを設定する(unsigned byte型)
 		glColor3ub(i, 0, 0);
 		g_Sphere[i].display();
@@ -138,10 +149,10 @@ void display() {
 	// カメラビュー座標への変換行列の設定
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
+	gluLookAt(g_EyeX, g_EyeY, g_EyeZ, 0, 0, 0, 0, 1, 0);
 
 	// 3つの球体を描画
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < NUM_OBJECTS; i++) {
 		// 球体ごとに色を変更する
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, g_Sphere[i].color);
 
@@ -161,20 +172,24 @@ void display() {
 		glBegin(GL_POINTS);
 		glVertex3d(g_SelectedPos.x, g_SelectedPos.y, g_SelectedPos.z);
 		glEnd();
+	}
 
-		// 文字を描画する位置の指定
-		glRasterPos3d(g_SelectedPos.x, g_SelectedPos.y, g_SelectedPos.z);
+	// ポイントの表示
+	double M[16];  // モデルビュー行列
+	double P[16];  // 凍死投影行列
+	int V[4];      // ビューポート
+	glGetDoublev(GL_MODELVIEW_MATRIX, M);
+	glGetDoublev(GL_PROJECTION_MATRIX, P);
+	glGetIntegerv(GL_VIEWPORT, V);
 
-		// 表示する文字列の構築
-		// ※もし sprintf_s でコンパイルエラーになる場合は sprintf を使うこと
-		char str[256];
-		sprintf_s(str, "sphere[%d] (%lf, %lf, %lf)", g_SelectedSphereID,
-				g_SelectedPos.x, g_SelectedPos.y, g_SelectedPos.z);
-
-		// 文字列を1文字ずつ描画
-		for (int i = 0; str[i] != '\0'; i++) {
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str[i]);
-		}
+	double gx, gy, gz;
+	gluUnProject(0, 1.5, 0, M, P, V, &gx, &gy, &gz);
+    glRasterPos3d(gx, gy, gz);
+	glColor3f(0, 0, 0);
+	char point[64];
+	sprintf_s(point, "Point: %d", g_GamePoint);
+	for (unsigned i = 0; point[i] != '\0'; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, point[i]);
 	}
 
 	glutSwapBuffers();
@@ -202,6 +217,14 @@ void MousePick(int x, int _y) {
 
 	// 球が選択されていないなら何もしない
 	if (g_SelectedSphereID == -1) return;
+
+	// 赤だったらポイント追加
+	if (g_SelectedSphereID < 3) {
+		g_GamePoint++;
+	}
+	else {  // それ以外を選んだらマイナスポイント
+		g_GamePoint--;
+	}
 
 	// クリックした場所の座標値（3次元座標）を取得する
 
@@ -247,22 +270,66 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'Q':
 	case '\033':
 		exit(0);  /* '\033' は ESC の ASCII コード */
+	case 'w':
+	case 'W':
+		g_EyeY++;
+		break;
+	case 's':
+	case 'S':
+		g_EyeY--;
+		break;
+	case 'a':
+	case 'A':
+		g_EyeX--;
+		break;
+	case 'd':
+	case 'D':
+		g_EyeX++;
+		break;
 	default:
 		break;
 	}
 
+	gluLookAt(g_EyeX, g_EyeY, g_EyeZ, 0, 0, 0, 0, 1, 0);
 	glutPostRedisplay();
+}
+
+void timer(int val) {
+	// 球体の移動
+	for (int i = 0; i < NUM_OBJECTS; i++) {
+		g_Sphere[i].position += g_Sphere[i].vec;
+	}
+
+	glutPostRedisplay();
+    glutTimerFunc(g_AnimationIntervalMsec, timer, val);
 }
 
 
 void init() {
-	// 3つの球体の位置と色を設定しておく
-	g_Sphere[0].position.set(-5, 0, 0);
-	g_Sphere[1].position.set( 0, 0, 0);
-	g_Sphere[2].position.set( 5, 0, 0);
-	g_Sphere[0].setColor(1, 0, 0);
-	g_Sphere[1].setColor(0, 1, 0);
-	g_Sphere[2].setColor(0, 0, 1);
+	// 視点
+	g_EyeZ = 30.0;
+
+	// 球体の速度を乱数で決定
+	random_device rnd;
+	mt19937 mt(rnd());
+	uniform_int_distribution<> rand(-1, 1);
+	for (int i = 0; i < NUM_OBJECTS; i++) {
+		if (i < 3) {      // 赤
+			g_Sphere[i].position.set( -5, 0, 0);
+			g_Sphere[i].setColor(1, 0, 0);
+		}
+		else if (i < 6) { // 緑
+            g_Sphere[i].position.set( 0, 0, 0);
+			g_Sphere[i].setColor(0, 1, 0);
+		}
+		else {            // 青
+            g_Sphere[i].position.set( 5, 0, 0);
+            g_Sphere[i].setColor(0, 0, 1);
+		}
+		// 適当な速度を設定
+		Vector3d randSpeed = Vector3d(rand(mt), rand(mt), rand(mt));
+		g_Sphere[i].vec = randSpeed;
+	}
 
 	glClearDepth(1000.0);
 	glClearColor(1, 1, 1, 1); // 背景の色を白に設定
@@ -301,6 +368,7 @@ int main(int argc, char**argv) {
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glutKeyboardFunc(keyboard);
+	glutTimerFunc(g_AnimationIntervalMsec, timer, 0);
 
 	init();
 
