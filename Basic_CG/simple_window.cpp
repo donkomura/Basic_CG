@@ -91,10 +91,10 @@ public:
 // ゲームのポイント
 int g_GamePoint = 0;
 
-const int g_AnimationIntervalMsec = 600;
+const int g_AnimationIntervalMsec = 700;
 
 // 3つの球体を準備しておく
-#define NUM_OBJECTS 9
+#define NUM_OBJECTS 90
 Sphere g_Sphere[NUM_OBJECTS];
 
 // 視点
@@ -277,7 +277,11 @@ void keyboard(unsigned char key, int x, int y) {
 	case 's':
 	case 'S':
 		g_EyeY--;
+	default:
 		break;
+	}
+
+	switch (key) {
 	case 'a':
 	case 'A':
 		g_EyeX--;
@@ -286,7 +290,7 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'D':
 		g_EyeX++;
 		break;
-	default:
+	default: 
 		break;
 	}
 
@@ -314,11 +318,11 @@ void init() {
 	mt19937 mt(rnd());
 	uniform_int_distribution<> rand(-1, 1);
 	for (int i = 0; i < NUM_OBJECTS; i++) {
-		if (i < 3) {      // 赤
+		if (i < NUM_OBJECTS / 3) {      // 赤
 			g_Sphere[i].position.set( -5, 0, 0);
 			g_Sphere[i].setColor(1, 0, 0);
 		}
-		else if (i < 6) { // 緑
+		else if (i < 2 * NUM_OBJECTS / 3) { // 緑
             g_Sphere[i].position.set( 0, 0, 0);
 			g_Sphere[i].setColor(0, 1, 0);
 		}
