@@ -85,15 +85,28 @@ void display(void) {
 	glEnd();
 	
 	// ★ ここにベジェ曲線を描画するコードを追加する
-    glColor3d(0.0, 0.0, 0.0);
+    glColor3d(0.0, 0.0, 1.0);
     glBegin(GL_LINE_STRIP);
     for (unsigned int i = 0; i < g_ControlPoints.size(); i += 3) {
         if (i + 3 >= g_ControlPoints.size()) break;
-        for (double t = 0; t < 1.0; t += 0.0001) {
-            Vector2d _pt = (1 - t) * (1 - t) * (1 - t) * g_ControlPoints[i];
-            _pt += 3 * t * (1 - t) * (1 - t) * g_ControlPoints[i + 1];
-            _pt += 3 * t * t * (1 - t) * g_ControlPoints[i + 2];
-            _pt += t * t * t * g_ControlPoints[i + 3];
+		for (double t = 0; t < 1.0; t += 0.01) {
+			Vector2d _pt = (1 - t) * (1 - t) * (1 - t) * g_ControlPoints[i];
+			_pt += 3 * t * (1 - t) * (1 - t) * g_ControlPoints[i + 1];
+			_pt += 3 * t * t * (1 - t) * g_ControlPoints[i + 2];
+			_pt += t * t * t * g_ControlPoints[i + 3];
+			glVertex2d(_pt.x, _pt.y);
+
+			// 接線ベクトル
+			Vector2d _kt = -3 * (1 - t) * (1 - t) * g_ControlPoints[i];
+			_kt += (9 * t * t - 12 * t + 3) * g_ControlPoints[i + 1];
+			_kt += (-9 * t * t + 6 * t) * g_ControlPoints[i + 2];
+			_kt += 3 * t * t * g_ControlPoints[i + 3];
+			// 法線ベクトル
+			Vector2d _nt = Vector2d(_kt.y, -_kt.x);
+			_nt.normalize();
+			_nt.scale(30);
+			_nt = _pt - _nt;
+			glVertex2d(_nt.x, _nt.y);
             glVertex2d(_pt.x, _pt.y);
         }
     }
