@@ -103,8 +103,20 @@ void display(void) {
 			_kt += 3 * t * t * g_ControlPoints[i + 3];
 			// 法線ベクトル
 			Vector2d _nt = Vector2d(_kt.y, -_kt.x);
+			// normarize
+			_kt.normalize();
 			_nt.normalize();
-			_nt.scale(30);
+
+			// 曲率
+			Vector2d _lt = 6 * (1 - t) * g_ControlPoints[i];
+			_lt += (18 * t - 12) * g_ControlPoints[i + 1];
+			_lt += (-18 * t + 6) * g_ControlPoints[i + 2];
+			_lt += 6 * t * g_ControlPoints[i + 3];
+			// 絶対値
+			double _x2y2 = _kt.x * _kt.x + _kt.y * _kt.y;
+			double _k = (_kt.x * _lt.y - _kt.y * _lt.x) / _x2y2 / sqrt(_x2y2);
+
+			_nt.scale(_k / 80.0);
 			_nt = _pt - _nt;
 			glVertex2d(_nt.x, _nt.y);
             glVertex2d(_pt.x, _pt.y);
