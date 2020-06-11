@@ -71,7 +71,7 @@ const int NUM_NOT = 10;
 // ノットベクトル
 // この配列の値を変更することで基底関数が変化する。その結果として形が変わる。
 // 下の例では、一定間隔で値が変化するので、「一様Bスプライン曲線」となる
-double g_NotVector[] = {0, 1, 2, 3, 4, 5, 6, 7}; 
+double g_NotVector[] = {0, 0, 0, 0, 1, 1, 1, 1}; 
 
 // 基底関数 N{i,n}(t)の値を計算する
 double getBaseN(int i, int n, double t) {
@@ -85,8 +85,8 @@ double getBaseN(int i, int n, double t) {
 		// ★ここに必要なプログラムコードを記述する
 		// ★再帰（自分自身の関数 getBaseN を呼ぶ処理が必要）
 		// ★係数を計算するときに、ノットが重なる（分母がゼロとなる）ときには、その項を無視する。
-		double _a = (t - g_NotVector[i]) / (g_NotVector[i + n] - g_NotVector[i]);
-		double _b = (g_NotVector[i + n + 1] - t) / (g_NotVector[i + n + 1] - g_NotVector[i + 1]);
+		double _a = g_NotVector[i + n] == g_NotVector[i] ? 0 : (t - g_NotVector[i]) / (g_NotVector[i + n] - g_NotVector[i]);
+		double _b = g_NotVector[i + n + 1] == g_NotVector[i + 1] ? 0 : (g_NotVector[i + n + 1] - t) / (g_NotVector[i + n + 1] - g_NotVector[i + 1]);
 		return _a * getBaseN(i, n - 1, t) + _b * getBaseN(i + 1, n - 1, t);
 	}
 }
