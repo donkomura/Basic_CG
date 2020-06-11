@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include <assert.h>
 #include <GL/glut.h>
 
 // 次数
@@ -70,10 +71,7 @@ const int NUM_NOT = 10;
 // ノットベクトル
 // この配列の値を変更することで基底関数が変化する。その結果として形が変わる。
 // 下の例では、一定間隔で値が変化するので、「一様Bスプライン曲線」となる
-double g_NotVector[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; 
-
-// 2 * N + L以上あればよい
-double dp[2 * N + NUM_NOT][2 * N + NUM_NOT];
+double g_NotVector[] = {0, 1, 2, 3, 4, 5, 6, 7}; 
 
 // 基底関数 N{i,n}(t)の値を計算する
 double getBaseN(int i, int n, double t) {
@@ -87,9 +85,9 @@ double getBaseN(int i, int n, double t) {
 		// ★ここに必要なプログラムコードを記述する
 		// ★再帰（自分自身の関数 getBaseN を呼ぶ処理が必要）
 		// ★係数を計算するときに、ノットが重なる（分母がゼロとなる）ときには、その項を無視する。
-		double _a = (g_NotVector[i + N] == g_NotVector[i] ? 0 : (t - g_NotVector[i]) / (double)(g_NotVector[i + N] - g_NotVector[i]));
-		double _b = (g_NotVector[i + N + 1] == g_NotVector[i + 1] ? 0 : (g_NotVector[i + N + 1] - t) / (double)(g_NotVector[i + N + 1] - g_NotVector[i + 1]));
-		return dp[i][n] = _a * getBaseN(i, n - 1, t) + _b * getBaseN(i + 1, n - 1, t);
+		double _a = (t - g_NotVector[i]) / (g_NotVector[i + n] - g_NotVector[i]);
+		double _b = (g_NotVector[i + n + 1] - t) / (g_NotVector[i + n + 1] - g_NotVector[i + 1]);
+		return _a * getBaseN(i, n - 1, t) + _b * getBaseN(i + 1, n - 1, t);
 	}
 }
 
@@ -119,19 +117,21 @@ void display(void) {
 	// ★ ここにBスプライン曲線を描画するプログラムコードを入れる
 	// ヒント1: 3次Bスプラインの場合は制御点を4つ入れるまでは何も描けない
 	// ヒント2: パラメータtの値の取り得る範囲に注意
-	glColor3d(0.0, 0.0, 1.0);
-	glBegin(GL_LINE_STRIP);
-	for (unsigned int i = 0; i < g_ControlPoints.size(); i++) {
-		if (i + 3 >= g_ControlPoints.size()) break;
-        for (double _t = g_NotVector[i + N]; _t < g_NotVector[i + N + 1]; _t += 0.01) {
-            Vector2d _pt;
-            // n + L が制御点の個数(= g_ControlPoints.size)
-            for (unsigned int j = 0; j < g_ControlPoints.size(); j++) {
-                _pt += getBaseN(j, N, _t) * g_ControlPoints[j];
-            }
-            glVertex2d(_pt.x, _pt.y);
-		}
+	if (g_ControlPoints.size() < 4) {
+		glutSwapBuffers();
+		return;
 	}
+
+    glColor3d(0.0, 0.0, 1.0);
+    glBegin(GL_LINE_STRIP);
+    for (double _t = g_NotVector[N]; _t < g_NotVector[g_ControlPoints.size()]; _t += 0.01) {
+        Vector2d _pt;
+        // n + L が制御点の個数(= g_ControlPoints.size)
+        for (unsigned int j = 0; j < g_ControlPoints.size(); j++) {
+            _pt += getBaseN(j, N, _t) * g_ControlPoints[j];
+        }
+        glVertex2d(_pt.x, _pt.y);
+    }
 	glEnd();
 
 	glutSwapBuffers();
@@ -193,6 +193,7 @@ void mouse(int button, int state, int x, int y) {
 
 // メインプログラム
 int main (int argc, char *argv[]) { 
+	printf("%f\n", getBaseN(0, 3, 3.0));
 	glutInit(&argc, argv);          // ライブラリの初期化
 	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE); // 描画モードの指定
 	glutInitWindowSize(800 , 800);  // ウィンドウサイズを指定
