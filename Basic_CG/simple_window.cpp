@@ -66,12 +66,12 @@ Vector2d operator/( const Vector2d& v, const double& k ) { return( Vector2d( v.x
 std::vector<Vector2d> g_ControlPoints; // 制御点を格納する
 
 // ノットベクトルの要素数 （参考書にあわせて、要素数は10としている）
-const int NUM_NOT = 8;
+const int NUM_NOT = 100;
 
 // ノットベクトル
 // この配列の値を変更することで基底関数が変化する。その結果として形が変わる。
 // 下の例では、一定間隔で値が変化するので、「一様Bスプライン曲線」となる
-double g_NotVector[] = {0, 0, 0, 0, 1, 1, 1, 1}; 
+double g_NotVector[NUM_NOT]; 
 
 // 基底関数 N{i,n}(t)の値を計算する
 double getBaseN(int i, int n, double t) {
@@ -193,7 +193,12 @@ void mouse(int button, int state, int x, int y) {
 
 // メインプログラム
 int main (int argc, char *argv[]) { 
-	printf("%f\n", getBaseN(0, 3, 3.0));
+	// 一様ノットベクトルの作成
+	g_NotVector[0] = 0.0, g_NotVector[NUM_NOT-1] = 1.0;
+	for (unsigned int i = 0; i < NUM_NOT; i++) {
+		g_NotVector[i] = g_NotVector[0] + (g_NotVector[NUM_NOT - 1] - g_NotVector[0]) * (double)i / (double)(NUM_NOT - 1);
+	}
+
 	glutInit(&argc, argv);          // ライブラリの初期化
 	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE); // 描画モードの指定
 	glutInitWindowSize(800 , 800);  // ウィンドウサイズを指定
