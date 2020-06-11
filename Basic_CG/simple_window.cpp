@@ -71,7 +71,7 @@ const int NUM_NOT = 10;
 // ノットベクトル
 // この配列の値を変更することで基底関数が変化する。その結果として形が変わる。
 // 下の例では、一定間隔で値が変化するので、「一様Bスプライン曲線」となる
-double g_NotVector[] = {0, 0, 0, 0, 1, 1, 1, 1}; 
+double g_NotVector[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; 
 
 // 基底関数 N{i,n}(t)の値を計算する
 double getBaseN(int i, int n, double t) {
