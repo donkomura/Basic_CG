@@ -15,18 +15,21 @@ double z[NUM_U+1][NUM_V+1]; // z 座標
 
 // 配列に座標値を設定する
 void setCoordinates() {
-
+	const double R = 100.0;
+	const double r = 50.0;
 	for(int i = 0; i < NUM_U+1; i++) {
 		for(int j = 0; j < NUM_V+1; j++) {
 
 			// u と v の値を 0.0 ～ 1.0 に正規化する
 			double u = 1.0 / NUM_U * i;
 			double v = 1.0 / NUM_V * j;
+			u *= 2 * PI;
+			v *= 2 * PI;
 
 			// 座標値の設定 ★ 以下の例ではz=0の平面になる
-			x[i][j] = u;
-			y[i][j] = v;
-			z[i][j] = 0.5 * exp(-10 * ((u-0.5)*(u-0.5) + (v-0.5)*(v-0.5)));
+			x[i][j] = R * cos(u) + r * cos(v) * cos(u);
+			y[i][j] = R * sin(u) + r * cos(v) * sin(u);
+			z[i][j] = r * sin(v);
 		}
 	}
 }
