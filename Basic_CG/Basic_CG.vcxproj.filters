@@ -15,8 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="simple_window.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
+    <Object Include="x64\hw07_02.obj" />
   </ItemGroup>
 </Project>
