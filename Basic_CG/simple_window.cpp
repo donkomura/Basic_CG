@@ -22,11 +22,13 @@ void setCoordinates() {
 			// u ‚Æ v ‚Ì’l‚ğ 0.0 ` 1.0 ‚É³‹K‰»‚·‚é
 			double u = 1.0 / NUM_U * i;
 			double v = 1.0 / NUM_V * j;
+			u *= 2.0 * PI;
+			v = v * PI - PI / 2.0;
 
 			// À•W’l‚Ìİ’è š ˆÈ‰º‚Ì—á‚Å‚Íz=0‚Ì•½–Ê‚É‚È‚é
-			x[i][j] = u;
-			y[i][j] = v;
-			z[i][j] = 0;
+			x[i][j] = cos(u) * cos(v);
+			y[i][j] = sin(u) * cos(v);
+			z[i][j] = sin(v);
 		}
 	}
 }
