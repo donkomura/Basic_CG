@@ -123,6 +123,8 @@ Sphere sphere(0.0, 0.0, -1500, // ’†SÀ•W
 
 Vector3d normSphere(0, 1, 0);
 
+#define N 3
+
 // •`‰æ‚ğs‚¤
 void display(void) {
 
@@ -144,9 +146,13 @@ void display(void) {
 				normSphere.normalize();
 				Vector3d light = lightDirection;
 				light.normalize();
+				Vector3d reflect = light - 2 * (light * normSphere) * normSphere;
+				reflect.normalize();
+				Vector3d view = viewPosition - Vector3d(0.0, 0.0, -1500);
+				view.normalize();
 
-				double Is = 0; // ‹¾–Ê”½ËŒõ
-				double Id = Iin * Ks * (normSphere * (-light)); // ŠgU”½ËŒõ
+				double Is = Iin * Ks * pow((reflect * view), 1.0 * N); // ‹¾–Ê”½ËŒõ
+				double Id = 0; // ŠgU”½ËŒõ
 
 				// š‚±‚±‚Å Is ‚¨‚æ‚Ñ Id ‚Ì’l‚ğŒvZ‚·‚é
 
