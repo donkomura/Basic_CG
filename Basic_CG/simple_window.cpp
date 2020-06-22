@@ -146,7 +146,7 @@ void display(void) {
 				light.normalize();
 
 				double Is = 0; // ‹¾–Ê”½ŽËŒõ
-				double Id = Iin * Ks * (normSphere * (-light)); // ŠgŽU”½ŽËŒõ
+				double Id = (normSphere * (-light)) < 0 ? 0 : Iin * Ks * (normSphere * (-light)); // ŠgŽU”½ŽËŒõ
 
 				// š‚±‚±‚Å Is ‚¨‚æ‚Ñ Id ‚Ì’l‚ðŒvŽZ‚·‚é
 
