@@ -129,7 +129,12 @@ public:
 	// x と z の値から床の色を返す（格子模様になるように）
 	Vector3d getColorVec(double x, double z) {
 		// ★ x, z の値によって(1.0, 1.0, 0.7)または(0.6, 0.6, 0.6)のどちらかの色を返すようにする
-		
+		if (x < 0) x = -x+100.0;
+		if (z < 0) z = -z+100.0;
+		int px = x / 100, pz = z / 100;
+		if (px % 2 == pz % 2) {
+			return Vector3d(1.0, 1.0, 0.7);
+		}
 		return Vector3d(0.6, 0.6, 0.6);
 	}
 };
@@ -200,12 +205,18 @@ void getPixelColor(double x, double y, Vector3d &colorVec) {
 	if(t_board > 0) { // 床との交点がある
 		// ★床の表面の色を設定する
 		// ★球の影になる場合は、RGBの値をそれぞれ0.5倍する
-		Vector3d board_color = board.getColorVec(0.0, 0.0);
-        double I = 1.0;
-        double r = std::min(I * board_color.x, 1.0); // 1.0 を超えないようにする
-        double g = std::min(I * board_color.y, 1.0); // 1.0 を超えないようにする
-        double b = std::min(I * board_color.z, 1.0); // 1.0 を超えないようにする
-
+		Vector3d to_board = viewPosition + t_board * ray;
+		double r, g, b;
+		if (to_board.z < -3000) {
+			r = g = b = 0.0;
+		} else {
+            Vector3d board_color = board.getColorVec(to_board.x, to_board.z);
+            double I = Ia;
+            r = std::min(I * board_color.x, 1.0); // 1.0 を超えないようにする
+            g = std::min(I * board_color.y, 1.0); // 1.0 を超えないようにする
+            b = std::min(I * board_color.z, 1.0); // 1.0 を超えないようにする
+		}
+		
 		colorVec.set(r, g, b);
 		return;
 	}
