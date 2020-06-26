@@ -201,7 +201,9 @@ void getPixelColor(double x, double y, Vector3d &colorVec) {
 		// ★床の表面の色を設定する
 		// ★球の影になる場合は、RGBの値をそれぞれ0.5倍する
 		Vector3d board_color = board.getColorVec(0.0, 0.0);
-        double I = Ia;
+		Vector3d norm = Vector3d(1.0, 0, 0);
+        double Id = (norm * (-lightDirection)) < 0 ? 0 : Iin * Kd * (norm * -lightDirection); // 拡散反射光
+        double I = Ia + Id;
         double r = std::min(I * board_color.x, 1.0); // 1.0 を超えないようにする
         double g = std::min(I * board_color.y, 1.0); // 1.0 を超えないようにする
         double b = std::min(I * board_color.z, 1.0); // 1.0 を超えないようにする
