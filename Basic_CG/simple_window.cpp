@@ -215,8 +215,14 @@ void getPixelColor(double x, double y, Vector3d &colorVec) {
             r = std::min(I * board_color.x, 1.0); // 1.0 ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
             g = std::min(I * board_color.y, 1.0); // 1.0 ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
             b = std::min(I * board_color.z, 1.0); // 1.0 ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
+
+			Vector3d light = -lightDirection;
+            double t_board_shadow = sphere.getIntersec(to_board, light);
+			if (t_board_shadow > 0) {
+				r *= 0.5, g *= 0.5, b *= 0.5;
+			}
 		}
-		
+
 		colorVec.set(r, g, b);
 		return;
 	}
