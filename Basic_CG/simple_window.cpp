@@ -211,7 +211,8 @@ void getPixelColor(double x, double y, Vector3d &colorVec) {
 			r = g = b = 0.0;
 		} else {
 			Vector3d norm = Vector3d(1.0, 0, 0);
-			Vector3d board_color = board.getColorVec(to_board.x, to_board.z); double Id = (norm * (-lightDirection)) < 0 ? 0 : Iin * Kd * (norm * -lightDirection); // ŠgŽU”½ŽËŒõ
+			Vector3d board_color = board.getColorVec(to_board.x, to_board.z); 
+			double Id = (norm * (-lightDirection)) < 0 ? 0 : Iin * Kd * (norm * -lightDirection); // ŠgŽU”½ŽËŒõ
 			double I = Ia + Id;
             r = std::min(I * board_color.x, 1.0); // 1.0 ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
             g = std::min(I * board_color.y, 1.0); // 1.0 ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
