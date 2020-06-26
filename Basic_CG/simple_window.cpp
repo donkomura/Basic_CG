@@ -205,23 +205,33 @@ void getPixelColor(double x, double y, Vector3d &colorVec) {
 	if(t_board > 0) { // 床との交点がある
 		// ★床の表面の色を設定する
 		// ★球の影になる場合は、RGBの値をそれぞれ0.5倍する
-		Vector3d to_board = viewPosition + t_board * ray;
-		double r, g, b;
-		if (to_board.z < -3000) {
-			r = g = b = 0.0;
-		} else {
-            Vector3d board_color = board.getColorVec(to_board.x, to_board.z);
-            double I = Ia;
-            r = std::min(I * board_color.x, 1.0); // 1.0 を超えないようにする
-            g = std::min(I * board_color.y, 1.0); // 1.0 を超えないようにする
-            b = std::min(I * board_color.z, 1.0); // 1.0 を超えないようにする
+        double r = 0.0, g = 0.0, b = 0.0;
+		for (double xi = 0.0; xi < 1.0; xi += 1.0 / 3.0) {
+			for (double yi = 0.0; yi < 1.0; yi += 1.0 / 3.0) {
+				double _r = 0.0, _g = 0.0, _b = 0.0;
+				Vector3d _ray(x - viewPosition.x + xi, y - viewPosition.y + yi, screen_z - viewPosition.z);
+                double _t_board = board.getIntersec(viewPosition, _ray);
+				Vector3d to_board = viewPosition + _t_board * _ray;
+				if (to_board.z < -3000) {
+					continue;
+				} else {
+					Vector3d board_color = board.getColorVec(to_board.x, to_board.z);
+					double I = Ia;
+					_r += std::min(I * board_color.x, 1.0); // 1.0 を超えないようにする
+					_g += std::min(I * board_color.y, 1.0); // 1.0 を超えないようにする
+					_b += std::min(I * board_color.z, 1.0); // 1.0 を超えないようにする
 
-			Vector3d light = -lightDirection;
-            double t_board_shadow = sphere.getIntersec(to_board, light);
-			if (t_board_shadow > 0) {
-				r *= 0.5, g *= 0.5, b *= 0.5;
+					Vector3d light = -lightDirection;
+					double t_board_shadow = sphere.getIntersec(to_board, light);
+					if (t_board_shadow > 0) {
+						_r *= 0.5, _g *= 0.5, _b *= 0.5;
+					}
+				}
+				r += _r, g += _g, b += _b;
 			}
 		}
+		r /= 9.0, g /= 9.0, b /= 9.0;
+		
 
 		colorVec.set(r, g, b);
 		return;
