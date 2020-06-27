@@ -84,7 +84,24 @@ public:
 	}
 };
 
-#define POINT_NUM 20
+class Sphere {
+public:
+	Vector3d center;
+	double R;
+	
+	Sphere(double _x, double _y, double _z, double _r) {
+		center = Vector3d(_x, _y, _z);
+		R = _r;
+	}
+
+	bool isInner(Vector3d p) {
+		if ((p - center) * (p - center) <= R*R)
+			return true;
+        return false;
+	}
+};
+
+#define POINT_NUM 40
 
 // 布の定義
 class Cloth {
@@ -127,8 +144,8 @@ public:
 		}
 
 		// 固定点の指定
-		points[0][0].bFixed = true;
-		points[POINT_NUM-1][0].bFixed = true;
+		// points[0][0].bFixed = true;
+		// points[POINT_NUM-1][0].bFixed = true;
 	}
 };
 
@@ -145,6 +162,8 @@ double Mass = 30; // 質点の質量
 double dT = 1; // 時間刻み幅
 double Dk = 0.1; // 速度に比例して、逆向きにはたらく抵抗係数
 Vector3d gravity(0, -0.002, 0); // 重力(y軸方向の負の向きに働く)
+
+Sphere sphere = Sphere(0, 0, -POINT_NUM/2, 4.0);
 
 void drawCloth(void) {
 
@@ -285,12 +304,19 @@ void updateCloth(void) {
 			Vector3d acc = cloth->points[x][y].f / Mass;
 
 			// 3. 質点の速度 (cloth->points[x][y].v) を加速度に基づいて更新する
-			cloth->points[x][y].v = cloth->points[x][y].v + acc * dT;
+
+			Vector3d _v = cloth->points[x][y].v + acc * dT;
 
 			// 4. 質点の位置 (cloth->points[x][y].p) を速度に基づいて更新する
-			cloth->points[x][y].p = cloth->points[x][y].p + cloth->points[x][y].v * dT;
+			Vector3d _p = cloth->points[x][y].p + _v * dT;
 			
 			// オプション. 球体の内部に入るようなら、強制的に外に移動させる
+			if (sphere.isInner(_p)) {
+				_p = cloth->points[x][y].p;
+				_v = cloth->points[x][y].v;
+			}
+			cloth->points[x][y].p = _p;
+			cloth->points[x][y].v = _v;
 		}
 	}
 }
